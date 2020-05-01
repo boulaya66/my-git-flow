@@ -1,0 +1,19 @@
+{
+  "name": "git-test-1",
+  "version": "1.0.0",
+  "description": "test git commands for special use cases",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/boulaya66/git-test-.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/boulaya66/git-test-/issues"
+  },
+  "homepage": "https://github.com/boulaya66/git-test-#readme"
+}
