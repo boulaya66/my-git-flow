@@ -2,7 +2,7 @@
 
 ## Documentation:
 - [My git flow](MY-GITFLOW.md)
-- [My stash] **TODO**
+- [My stash](MY-STASH.md)
 - [Feature set] ***TODO***
 - Usefull commands (see bellow)
 
@@ -10,72 +10,28 @@
 ## Usefull commands
 
 ### Show branches
-
-```bash
-git fetch --all
-git branch -a
-git branch -r
-```
+| Command | Description |
+| --- | --- |
+|`git fetch --all`|Fetch all remotes|
+|`git branch -a`|List both remote-tracking branches and local branches. |
+|`git branch -r`|List the remote-tracking branches.|
+|``||
+|``||
 ### Show status
-```bash
-git rev-parse --abbrev-ref HEAD
-git symbolic-ref --short HEAD
-git rev-list --count --left-right origin/$branch...HEAD
-git log --pretty='format:%H %s'
-git status -s
-```
-```bash
-git log --graph --pretty='format:%H %s'
-```
+| Command | Description |
+| --- | --- |
+|`git rev-parse --abbrev-ref HEAD`|Retreives current branch name|
+|`git symbolic-ref --short HEAD`|Retreives current branch name|
+|`git rev-list --count --left-right origin/$branch...HEAD`|print the counts for left and right commits, separated by a tab|
+|`git log --pretty='format:%H %s'`|Customized logging: full commit tag and name|
+|`git log --graph --pretty='format:%H %s'`|Same with graph otpion|
+|`git status -s`|Give the output in the short-format.|
+|``||
 ### Undoos
-```bash
-git checkout HEAD file              
-git reset file                      
-git reset --soft HEAD~1             
-git commit --amend --no-edit        
-```
-
-## Managing unfinished work AND changing workplace
-Should be adapted to work on a specific branch
-
-### On computer 1
-```bash
-git fetch --all
-git pull
-# working .... time to leave !
-git add .
-git commit -m "TMP-save-1"
-git push
-```
-### On computer 2 
-```bash
-git fetch --all
-git pull
-# working .... time to leave !
-git add .
-git commit -m "TMP-save-2"
-git push
-```
-### On computer 1 (step n)
-```bash
-git fetch --all
-git pull
-# working .... ready to commit !
-git reset --soft HEAD~n         # replace n by the correct value
-git add .
-git commit -m "Work finished"
-git push --force                # !!very carefully
-```
-### On computer 2
-```bash
-git fetch --all
-git reset --hard origin/$branch  
-# OR
-git fetch --prune
-# working again .... time to leave... again !
-git add .
-git commit -m "TMP-save-1"
-git push
-```
-**TODO**: script to get n
+| Command | Description |
+| --- | --- |
+|`git checkout HEAD file`||
+|`git reset file`||
+|`git reset --soft HEAD~1`||
+|`git commit --amend --no-edit`||
 ___--- end of file ---___

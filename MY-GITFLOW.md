@@ -1,16 +1,18 @@
 # My git flow
+[Go back to ReadMe](README.md)
+
 Sources:
 - Github flow
 - Atlassian feature branch workflow
 
 ## STEP 0: start with an up-to-date master
-```bash
+```shell
 git checkout master
 git fetch origin
 git reset --hard origin/master
 ```
 ## STEP 1: create branch
-```bash
+```shell
 git branch $branch
 git checkout $branch
                                             # OR
@@ -18,7 +20,7 @@ git checkout -b $branch
 ```
 ## STEP 2: repeat(work on branch)
 Commits....
-```bash
+```shell
 # working ...
 git add .
 git commit -am "#XXX-msg-1"
@@ -29,7 +31,7 @@ git commit -am "#XXX-msg-n"
 git push -u origin $branch                  
 ```
 ...do other stuff...
-```bash
+```shell
 git fetch --all
 git checkout $branch
 git pull
@@ -39,7 +41,7 @@ git commit -am "#XXX-msg-n+1"
 git push                                    # other commits
 ```
 ....and clean up
-```bash
+```shell
 start = $(git merge-base $branch master)
 git rebase -i $start
                                             # clean history
@@ -50,7 +52,7 @@ git rebase --continue
 ## STEP 3: merge feature into master
 
 Rebase from master...
-```bash
+```shell
 git rebase -i master
                                             # resolve conflicts
 git rebase --continue
@@ -58,7 +60,7 @@ git push
 ```
 ...test...
 ...and merge into master
-```bash
+```shell
 git checkout master
 git pull
 git merge $branch
@@ -66,7 +68,7 @@ git push
 ```
 
 ## STEP 4: tag and delete branch
-```bash
+```shell
 git checkout master
 git pull
 git tag -a $version -m $version-extended
