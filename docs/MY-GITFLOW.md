@@ -1,7 +1,16 @@
 # My git flow
-[Go back to ReadMe](README.md)
+<div align="right">
+    <b><a href="../README.md">⟰ Project ReadMe</a></b>
+</div>
 
-Sources:
+## Table of contents
+- [STEP 0: start with an up-to-date master](#step-0-start-with-an-up-to-date-master)
+- [STEP 1: create branch](#step-1-create-branch)
+- [STEP 2: repeat(work on branch)](#step-2-repeat-work-on-branch-)
+- [STEP 3: merge feature into master](#step-3-merge-feature-into-master)
+- [STEP 4: tag and delete branch](#step-4-tag-and-delete-branch)
+
+**Sources:**
 - Github flow
 - Atlassian feature branch workflow
 
@@ -15,7 +24,7 @@ git reset --hard origin/master
 ```shell
 git branch $branch
 git checkout $branch
-                                            # OR
+# OR
 git checkout -b $branch
 ```
 ## STEP 2: repeat(work on branch)
@@ -35,7 +44,7 @@ git push -u origin $branch
 git fetch --all
 git checkout $branch
 git pull
-                                            # working ...
+# working ...
 git add .
 git commit -am "#XXX-msg-n+1"
 git push                                    # other commits
@@ -44,7 +53,7 @@ git push                                    # other commits
 ```shell
 start = $(git merge-base $branch master)
 git rebase -i $start
-                                            # clean history
+# clean history
 git rebase --edit-todo
 git rebase --continue
 ```
@@ -54,7 +63,7 @@ git rebase --continue
 Rebase from master...
 ```shell
 git rebase -i master
-                                            # resolve conflicts
+# resolve conflicts
 git rebase --continue
 git push
 ```
@@ -76,4 +85,8 @@ git push --tags
 git branch -d $branch
 git push origin --delete $branch      
 ```
+<div align="right">
+    <b><a href="#my-git-flow">↥ back to top</a></b>
+</div>
+
 ___--- end of file ---___

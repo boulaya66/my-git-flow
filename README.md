@@ -1,10 +1,11 @@
+<a name="top"></a>
 # Testing my git flow...
 
 ## Documentation:
-- [My git flow](MY-GITFLOW.md)
-- [My stash](MY-STASH.md)
+- [My git flow](./docs/MY-GITFLOW.md)
+- [My stashing workflow](./docs/MY-STASH.md)
 - [Feature set] ***TODO***
-- Usefull commands (see bellow)
+- Usefull commands (see below)
 
 
 ## Usefull commands
@@ -15,8 +16,12 @@
 |`git fetch --all`|Fetch all remotes|
 |`git branch -a`|List both remote-tracking branches and local branches. |
 |`git branch -r`|List the remote-tracking branches.|
-|``||
-|``||
+### Rename branches
+| Command | Description |
+| --- | --- |
+|`git $branch -m new-name`|Rename local branch, assuming we're in.|
+|`git push origin :$branch new-name`|Delete the old-name remote branch and push the new-name local branch.|
+|`git push origin -u new-name`|Reset the upstream branch for the new-name local branch,assuming we switched to it.|
 ### Show status
 | Command | Description |
 | --- | --- |
@@ -34,4 +39,8 @@
 |`git reset file`||
 |`git reset --soft HEAD~1`||
 |`git commit --amend --no-edit`||
+<div align="right">
+    <b><a href="#top">↥ back to top</a></b>
+</div>
+
 ___--- end of file ---___

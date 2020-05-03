@@ -1,7 +1,17 @@
 # My stashing workflow
-[Go back to ReadMe](README.md)
-
+<div align="right">
+    <b><a href="../README.md">⟰ Project ReadMe</a></b>
+</div>
+<br></br>
 This workflow is intended to manage unfinished work AND often changes of workplace.
+
+## Table of contents
+- [Introduction](#introduction)
+- [Step by step](#step-by-step)
+  - [Step 1: on computer 1](#step-1-on-computer-1)
+  - [Step 2: on computer 2](#step-2-on-computer-2)
+  - [Step n: on computer 1](#step-n-on-computer-1)
+  - [Step n+1: on computer 2](#step-n-1)
 
 ## Introduction
 
@@ -49,6 +59,7 @@ git add .
 git commit -m "Work finished"
 git push --force                # !!very carefully
 ```
+<a name="step-n-1"></a>
 ### Step n+1: on computer 2
 ```shell
 git reset --hard origin/$branch  
@@ -60,4 +71,8 @@ git commit -m "TMP-save-1"
 git push
 ```
 Go to step 1
+<div align="right">
+    <b><a href="#my-stashing-workflow">↥ back to top</a></b>
+</div>
+
 ___--- end of file ---___
