@@ -1,6 +1,6 @@
 # git-js 
 <div align="right">
-    <b><a href="README.md">⟰ Project ReadMe</a></b>
+    <b><a href="../README.md">⟰ Project ReadMe</a></b>
 </div>
 
 ## Table of contents
