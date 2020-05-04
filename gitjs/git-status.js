@@ -1,123 +1,208 @@
-#!/usr/bin/env node
+"use strict";
 
-'use strict';
+import colors from "colors";
+import { run, insert, silent, log } from "./utils.js";
+import { gitCurrentBranch } from "./git-branch.js";
 
-import {
-    run,
-    insert,
-    inject
-} from './utils.js';
-import 'colors';
+/**
+ * gitStatusShort
+ * git status short
+ */
+async function gitStatusShort(options) {
+    let items = [];
 
+    try {
+        const { stdout } = await run('git status -s');
 
-async function gitCurrentBranch() {
-    const { stdout } = await run('git symbolic-ref --short HEAD');
-    return stdout.split('\n')[0];
-}
-
-
-async function gitStatusShort() {
-    const { stdout } = await run('git status -s');
-
-    let items = stdout
-        .split('\n')
-        .filter(line => !!line.trim())
-        .map(line => insert(line, 1, ' '))
-        .map(line => {
-            let wd = line.charAt(2);
-            if (wd == " ")
-                return line.green
-            else if (wd == "?")
-                return line.yellow
-            else
-                return line.red
-        });
+        items = stdout
+            .split('\n')
+            .filter(line => !!line.trim())
+            .map(line => insert(line, 1, ' '))
+            .map(line => {
+                let wd = line.charAt(2);
+                if (wd == " ")
+                    return line.green
+                else if (wd == "?")
+                    return line.yellow
+                else
+                    return line.red
+            });
+    } catch (error) {
+    }
 
     if (items.length == 0)
         items = ['nothing to commit'.green];
 
+    log("git repo status :".cyan, options.verbose);
+    items.forEach(item => {
+        log(item, options.verbose)
+    });
+
     return items;
 };
 
-async function gitLogShort() {
-    const { stdout } = await run("git log --pretty='format:%h %<|(40,trunc)%s %ci'");
+/**
+ * gitLogShort
+ * git log short formated
+ */
+async function gitLogShort(options) {
+    let items = [];
+    try {
+        const { stdout } = await run("git log --pretty='format:%h %<|(40,trunc)%s %ci'");
 
-    let items = stdout
-        .split('\n')
-        .filter(line => !!line.trim());
+        items = stdout
+            .split('\n')
+            .filter(line => !!line.trim());
+    } catch (error) {
+    }
+
+    log("git repo log formated :".cyan, options.verbose);
+    items.forEach(item => {
+        log(item, options.verbose)
+    });
 
     return items;
 }
 
-async function gitGraphShort() {
-    const { stdout } = await run("git log --graph --pretty='format:%h %<|(40,trunc)%s %ci'");
+/**
+ * gitGraphShort
+ * git log graph formated
+ */
+async function gitGraphShort(options) {
+    let commits = [];
+    try {
+        const { stdout } = await run("git log --graph --pretty='format:%h %<|(40,trunc)%s %ci'");
 
-    let commits = stdout
-        .split('\n')
-        .filter(line => !!line.trim());
+        commits = stdout
+            .split('\n')
+            .filter(line => !!line.trim());
+    } catch (error) {
+    }
+
+    log("git repo graph formated :".cyan, options.verbose);
+    commits.forEach(item => {
+        log(item, options.verbose)
+    });
 
     return commits;
 }
 
-async function gitOriginAdvance(branch) {
+/**
+ * gitOriginAdvance
+ * outputs commits behind - ahead / upstream
+ */
+async function gitOriginAdvance(branch, options) {
+    let counts = [];
     try {
         const { stdout } = await run(`git rev-list --count --left-right origin/${branch}...HEAD`);
 
-        let counts = stdout
+        counts = stdout
             .split('\t')
             .map(count => parseInt(count))
         if (counts.length != 2)
             throw new Error('invalid result')
-
-        return counts;
     } catch (error) {
-        return ([]);
+
     }
-}
 
-async function gitFullStatus() {
-    let
-        branch,
-        paths,
-        commits,
-        advance;
-    branch = await gitCurrentBranch();
-    paths = await gitStatusShort();
-    commits = await gitGraphShort();//gitLogShort();
-    advance = await gitOriginAdvance(branch);
-
-    console.log('--------------------------------------------------------------------');
-    console.log(`Current branch is ${branch.magenta}`.cyan.bold);
-    console.log('  Commits log of the branch :'.blue);
-    commits.forEach(commit => console.log(`  ${commit}`));
-    console.log('  Differences between HEAD, index and working tree :'.blue)
-    paths.forEach(path => console.log(`    ${path}`));
-    console.log('  Commits behind - ahead / upstream :'.blue)
-    if (advance.length == 2) {
-        if (advance[0] == 0 && advance[1] == 0)
-            console.log(`    equal      ${advance[0]} - ${advance[1]}`.green);
-        else if (advance[0] > 0 && advance[1] > 0)
-            console.log(`    diverged   ${advance[0]} - ${advance[1]}`.red);
-        else if (advance[0] > 0)
-            console.log(`    behind     ${advance[0]} - ${advance[1]}`.red);
+    log("Commits behind - ahead / upstream :".cyan, options.verbose);
+    if (counts.length == 2) {
+        if (counts[0] == 0 && counts[1] == 0)
+            log(`    equal      ${counts[0]} - ${counts[1]}`.green, options.verbose);
+        else if (counts[0] > 0 && counts[1] > 0)
+            log(`    diverged   ${counts[0]} - ${counts[1]}`.red), options.verbose;
+        else if (counts[0] > 0)
+            log(`    behind     ${counts[0]} - ${counts[1]}`.red, options.verbose);
         else
-            console.log(`    ahead      ${advance[0]} - ${advance[1]}`.yellow);
+            log(`    ahead      ${counts[0]} - ${counts[1]}`.yellow, options.verbose);
     }
     else
-        console.log('    no upstream'.red);
-    console.log('--------------------------------------------------------------------');
-    await gitGraphShort()
+        log('    no upstream'.red, options.verbose);
+
+    return counts;
+}
+
+/**
+ * gitFullStatus
+ * outputs full of current branch
+ */
+async function gitFullStatus(options) {
+    let branch = await gitCurrentBranch(silent());
+    if (!branch){
+        log("Current dir is not a git repo.".red);
+        return "";
+    }
+
+    let paths = await gitStatusShort(silent());
+    let commits = await gitGraphShort(silent());//gitLogShort();
+    let advance = await gitOriginAdvance(branch, silent());
+
+    log('--------------------------------------------------------------------');
+    log(`Current branch is ${branch.green}`.cyan.bold);
+    log('  Commits log of the branch :'.blue);
+    commits.forEach(commit => log(`  ${commit}`));
+    log('  Differences between HEAD, index and working tree :'.blue)
+    paths.forEach(path => log(`    ${path}`));
+    log('  Commits behind - ahead / upstream :'.blue)
+    if (advance.length == 2) {
+        if (advance[0] == 0 && advance[1] == 0)
+            log(`    equal      ${advance[0]} - ${advance[1]}`.green);
+        else if (advance[0] > 0 && advance[1] > 0)
+            log(`    diverged   ${advance[0]} - ${advance[1]}`.red);
+        else if (advance[0] > 0)
+            log(`    behind     ${advance[0]} - ${advance[1]}`.red);
+        else
+            log(`    ahead      ${advance[0]} - ${advance[1]}`.yellow);
+    }
+    else
+        log('    no upstream'.red);
+    log('--------------------------------------------------------------------');
 
     return branch;
 }
 
+/**
+ * register
+ * create program subcommands
+ */
+function register(program) {
+    program
+        .command("status")
+        .alias("ss")
+        .description("git status short")
+        .action(gitStatusShort);
+
+    program
+        .command("log")
+        .alias("lg")
+        .description("git log short")
+        .action(gitLogShort);
+
+    program
+        .command("graph")
+        .alias("gr")
+        .description("git log graph short")
+        .action(gitGraphShort);
+
+    program
+        .command("advance <branch>")
+        .alias("ad")
+        .description("commits behind - ahead / upstream")
+        .action(gitOriginAdvance);
+
+    program
+        .command("status-full")
+        .alias("sf")
+        .description("outputs full of current branch")
+        .action(gitFullStatus);
+}
+
 export {
     gitStatusShort,
-    gitCurrentBranch,
     gitLogShort,
-    gitOriginAdvance,
     gitGraphShort,
-    gitFullStatus
+    gitOriginAdvance,
+    register
 }
 
 //____end of file____

@@ -26,6 +26,7 @@ git branch $branch
 git checkout $branch
 # OR
 git checkout -b $branch
+git push -u origin $branch
 ```
 ## STEP 2: repeat(work on branch)
 Commits....
@@ -36,8 +37,7 @@ git commit -am "#XXX-msg-1"
 # working ...
 git add .
 git commit -am "#XXX-msg-n"
-# first commit
-git push -u origin $branch                  
+git push
 ```
 ...do other stuff...
 ```shell
@@ -56,23 +56,27 @@ git rebase -i $start
 # clean history
 git rebase --edit-todo
 git rebase --continue
+git push --force
 ```
 
 ## STEP 3: merge feature into master
 
 Rebase from master...
 ```shell
+git checkout master
+git pull
+git checkout $branch
 git rebase -i master
 # resolve conflicts
 git rebase --continue
-git push
+git push --force
 ```
 ...test...
 ...and merge into master
 ```shell
 git checkout master
 git pull
-git merge $branch
+git merge --no-ff $branch -m "merge name"
 git push
 ```
 
