@@ -17,10 +17,10 @@ const log = (message, verbose = true) => {
 };
 
 log.enabled = true;
-log.enable = function () { log.enabled = true }
-log.disable = function () { log.enabled = false }
+log.enable = function () { log.enabled = true };
+log.disable = function () { log.enabled = false };
 
-const olderror = console.error
+const olderror = console.error;
 console.error = (message) => olderror(message.red);
 
 export {
@@ -29,6 +29,6 @@ export {
     inject,
     silent,
     log
-}
+};
 
-//____end of file____
+// ____end of file____

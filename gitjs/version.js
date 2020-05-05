@@ -2,13 +2,13 @@
 
 import fs from 'fs';
 
-function getCurrentVersion(){
-    let content= fs.readFileSync('package.json');
+function getCurrentVersion() {
+    const content = fs.readFileSync('package.json');
     return JSON.parse(content).version;
 }
 
 export {
     getCurrentVersion
-}
+};
 
-//____end of file____
+// ____end of file____

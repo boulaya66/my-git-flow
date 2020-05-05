@@ -1,12 +1,11 @@
 #!/usr/bin/env node
 
-"use strict";
+'use strict';
 
 /**
  * import packages
  */
-import program from "./init.js";
-
+import program from './init.js';
 
 /**
  * gitjs
@@ -25,4 +24,4 @@ async function gitjs() {
  */
 gitjs().catch(error => console.error(error.message));
 
-//____end of file____
+// ____end of file____

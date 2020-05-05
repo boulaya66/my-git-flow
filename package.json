@@ -5,10 +5,12 @@
   "type": "module",
   "main": "./public/server.js",
   "scripts": {
-    "test": "clear && node ./gitjs/index.js gitBranches branch 'commit msg'"
+    "test": "node ./gitjs/index.js --clear list",
+    "start": "node ./gitjs/index.js --clear"
   },
   "bin": {
-    "gitjs": "./gitjs/index.js"
+    "gitjs": "./gitjs/index.js",
+    "semver": "./node_modules/.bin/semver"
   },
   "repository": {
     "type": "git",
@@ -26,6 +28,16 @@
   "homepage": "https://github.com/boulaya66/git-test-#readme",
   "dependencies": {
     "colors": "^1.4.0",
-    "commander": "^5.1.0"
+    "commander": "^5.1.0",
+    "inquirer": "^7.1.0",
+    "semver": "^7.3.2"
+  },
+  "devDependencies": {
+    "eslint": "^6.8.0",
+    "eslint-config-standard": "^14.1.1",
+    "eslint-plugin-import": "^2.20.2",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1"
   }
 }
