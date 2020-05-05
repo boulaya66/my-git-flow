@@ -4,10 +4,11 @@
  * import packages
  */
 import commander from 'commander';
+import inquirer from 'inquirer';
 import colors from 'colors';
 import { log } from './utils.js';
 import { getCurrentVersion } from './version.js';
-import * as branch from './git-branch.js';
+import * as branches from './git-branch.js';
 import * as status from './git-status.js';
 
 /**
@@ -55,7 +56,7 @@ const program = new GitjsCommand()
         console.clear();
     });
 
-branch.register(program);
+branches.register(program);
 status.register(program);
 
 /**
@@ -83,6 +84,51 @@ async function gitjsList(options) {
     return items.join('\n');
 }
 
+/**
+ * gitjsMenu
+ * gitjs interactive
+ */
+async function gitjsMenu(options) {
+    console.clear();
+
+    const items = [];
+    program.commands.forEach(cmd => {
+        if (cmd.name() !== 'list')
+            items.push({
+                value: cmd.name(),
+                name: `${cmd.description().padEnd(40).white} | ${cmd.usage().padEnd(20)}`
+            });
+    });
+    items.sort((a, b) => a.name.localeCompare(b.name));
+    items.push(new inquirer.Separator());
+    items.push({ name: 'Help'.yellow.bold, value: 'Help' });
+    items.push(new inquirer.Separator());
+    items.push({ name: 'Abort'.red.bold, short: ' ', value: '' });
+
+    const answers = await inquirer.prompt({
+        type: 'list',
+        name: 'command',
+        message: 'Select git-js command'.cyan.bold,
+        choices: items,
+        default: 'Help',
+        pageSize: 20
+    });
+
+    if (!answers.command) {
+        log('Abort.'.red);
+    } else if (answers.command === 'Help') {
+        program.outputHelp();
+    } else {
+        const cmd = program.commands.find(cmd => cmd.name() === answers.command);
+        process.argv.push(cmd.name());
+        if (cmd._args.length > 0 && cmd._args[0].required && cmd._args[0].name === 'branch') {
+            const branch = await branches.selectBranch();
+            process.argv.push(branch);
+        }
+        await program.parseAsync(process.argv);
+    }
+}
+
 program
     .command('list')
     .alias('l')
@@ -90,5 +136,10 @@ program
     .action(gitjsList);
 
 export default program;
+
+export {
+    program,
+    gitjsMenu
+};
 
 // ____end of file____

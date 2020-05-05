@@ -5,18 +5,17 @@
 /**
  * import packages
  */
-import program from './init.js';
+import { program, gitjsMenu } from './init.js';
 
 /**
  * gitjs
  * async commander main entry point
  */
 async function gitjs() {
-    if (!process.argv.slice(2).length) {
-        program.outputHelp();
-        process.exit();
-    }
-    return await program.parseAsync(process.argv);
+    if (!process.argv.slice(2).length)
+        return await gitjsMenu();
+    else
+        return await program.parseAsync(process.argv);
 }
 
 /**

@@ -48,7 +48,7 @@ async function gitStatusShort(options) {
 async function gitLogShort(options) {
     let items = [];
     try {
-        const { stdout } = await run("git log --date=format:%x %X --full-history --decorate --all --pretty='format:%h %<|(40,trunc)%s %cd %cN'");
+        const { stdout } = await run("git log --date='format:%x %X' --full-history --decorate --pretty='format:%h %<|(40,trunc)%s %cd %cN'");
 
         items = stdout
             .split('\n')
@@ -71,7 +71,7 @@ async function gitLogShort(options) {
 async function gitGraphShort(options) {
     let commits = [];
     try {
-        const { stdout } = await run("git log --date='format:%x %X' --full-history --decorate --all --pretty='format:%h %<|(40,trunc)%s %cd %cN' --graph ");
+        const { stdout } = await run("git log --date='format:%x %X' --full-history --decorate --pretty='format:%h %<|(40,trunc)%s %cd %cN' --graph ");
 
         commits = stdout
             .split('\n')
@@ -167,31 +167,31 @@ function register(program) {
     program
         .command('status')
         .alias('ss')
-        .description('git status short')
+        .description('status short')
         .action(gitStatusShort);
 
     program
         .command('log')
         .alias('lg')
-        .description('git log short')
+        .description('log short')
         .action(gitLogShort);
 
     program
         .command('graph')
         .alias('gr')
-        .description('git log graph short')
+        .description('log graph short')
         .action(gitGraphShort);
 
     program
         .command('advance <branch>')
         .alias('ad')
-        .description('commits behind - ahead / upstream')
+        .description('status behind - ahead / upstream')
         .action(gitOriginAdvance);
 
     program
         .command('status-full')
         .alias('sf')
-        .description('outputs full of current branch')
+        .description('status full of current branch')
         .action(gitFullStatus);
 }
 
@@ -200,6 +200,7 @@ export {
     gitLogShort,
     gitGraphShort,
     gitOriginAdvance,
+    gitFullStatus,
     register
 };
 
