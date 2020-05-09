@@ -33,10 +33,10 @@ Commits....
 ```shell
 # working ...
 git add .
-git commit -am "#XXX-msg-1"
+git commit -am "FEA#999-msg-1"
 # working ...
 git add .
-git commit -am "#XXX-msg-n"
+git commit -am "FEA#999-msg-n"
 git push
 ```
 ...do other stuff...
@@ -46,7 +46,7 @@ git checkout $branch
 git pull
 # working ...
 git add .
-git commit -am "#XXX-msg-n+1"
+git commit -am "FEA#999-msg-n+1"
 git push                                    # other commits
 ```
 ....and clean up

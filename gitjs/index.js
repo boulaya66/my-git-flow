@@ -5,7 +5,8 @@
 /**
  * import packages
  */
-import { program, gitjsMenu } from './init.js';
+import program from './init.js';
+import gitjsMenu from './menu.js';
 
 /**
  * gitjs

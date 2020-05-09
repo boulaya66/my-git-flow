@@ -4,12 +4,13 @@
 </div>
 
 ## Table of contents
-- [Setting up a node shell script](##setting-up-a-node-shell-script)
-    - [Reading files](#reading-files)
-    - [Pipes In](#pipes-in)
-    - [Pipes Out](#pipes-out)
-    - [Environment and arguments](#environment-and-arguments)
+- [Setting up a node shell script](#toc-1)
+    - [Reading files](#toc-1-1)
+    - [Pipes In](#toc-1-2)
+    - [Pipes Out](#toc-1-3)
+    - [Environment and arguments](#toc-1-4)
 
+<a name="toc-1"></a>
 ## Setting up a node shell script
 
 1. Add that line at the top of the js script
@@ -24,6 +25,7 @@ chmod +x script.js
 ```shell
 ./script.js
 ```
+<a name="toc-1-1"></a>
 ### Reading files
 ```javascript
 #!/usr/bin/env node
@@ -31,6 +33,7 @@ var fs = require('fs');
 var contents = fs.readFileSync('my_file.txt', 'utf8'); 
 console.log(contents);
 ```
+<a name="toc-1-2"></a>
 ### Pipes In
 This is a sample code reading stdin.
 ```javascript
@@ -53,7 +56,7 @@ var initScript = function(input){
 } 
 readInput(initScript);
 ```
-
+<a name="toc-1-3"></a>
 ### Pipes Out
 Put this piece of code before piping out.
 ```javascript
@@ -67,6 +70,7 @@ function epipeFilter(err) {
 }
 process.stdout.on('error', epipeFilter);
 ```
+<a name="toc-1-4"></a>
 ### Environment and arguments
 Get them respectively in process.env and process.argv
 ```javascript

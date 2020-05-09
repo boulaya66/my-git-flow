@@ -5,7 +5,7 @@
   "type": "module",
   "main": "./public/server.js",
   "scripts": {
-    "test": "node ./gitjs/index.js --clear list",
+    "list": "node ./gitjs/index.js --clear list",
     "start": "node ./gitjs/index.js --clear"
   },
   "bin": {
@@ -27,9 +27,10 @@
   },
   "homepage": "https://github.com/boulaya66/git-test-#readme",
   "dependencies": {
-    "colors": "^1.4.0",
+    "chalk": "^4.0.0",
     "commander": "^5.1.0",
     "inquirer": "^7.1.0",
+    "inquirer-command-prompt": "0.0.27",
     "semver": "^7.3.2"
   },
   "devDependencies": {

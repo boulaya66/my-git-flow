@@ -1,8 +1,11 @@
 'use strict';
 
-import 'colors';
-import { run, insert, silent, log } from './utils.js';
-import { gitCurrentBranch } from './git-branch.js';
+import chalk from 'chalk';
+import { gitCurrentBranch, localBranch } from './git-branch.js';
+import git from './git-commands.js';
+import { insert, log, silent } from './utils.js';
+
+var localStatus = {};
 
 /**
  * gitStatusShort
@@ -11,29 +14,34 @@ import { gitCurrentBranch } from './git-branch.js';
 async function gitStatusShort(options) {
     let items = [];
 
-    try {
-        const { stdout } = await run('git status -s');
+    const { data } = await git.status();
 
-        items = stdout
-            .split('\n')
-            .filter(line => !!line.trim())
-            .map(line => insert(line, 1, ' '))
-            .map(line => {
-                const wd = line.charAt(2);
-                if (wd === ' ')
-                    return line.green;
-                else if (wd === '?')
-                    return line.yellow;
-                else
-                    return line.red;
-            });
-    } catch (error) {
-    }
+    localStatus.staged = 0;
+    localStatus.modified = 0;
+    localStatus.untracked = 0;
+
+    items = data
+        .split('\n')
+        .filter(line => !!line.trim())
+        .map(line => insert(line, 1, ' '))
+        .map(line => {
+            const wd = line.charAt(2);
+            if (wd === ' ') {
+                localStatus.staged++;
+                return chalk.green(line);
+            } else if (wd === '?') {
+                localStatus.untracked++;
+                return chalk.yellow(line);
+            } else {
+                localStatus.modified++;
+                return chalk.red(line);
+            }
+        });
 
     if (items.length === 0)
-        items = ['nothing to commit'.green];
+        items = [chalk.green('nothing to commit')];
 
-    log('git repo status :'.cyan, options.verbose);
+    log.info('git repo status :', options.verbose);
     items.forEach(item => {
         log(item, options.verbose);
     });
@@ -47,16 +55,13 @@ async function gitStatusShort(options) {
  */
 async function gitLogShort(options) {
     let items = [];
-    try {
-        const { stdout } = await run("git log --date='format:%x %X' --full-history --decorate --pretty='format:%h %<|(40,trunc)%s %cd %cN'");
+    const { data } = await git.log();
 
-        items = stdout
-            .split('\n')
-            .filter(line => !!line.trim());
-    } catch (error) {
-    }
+    items = data
+        .split('\n')
+        .filter(line => !!line.trim());
 
-    log('git repo log formated :'.cyan, options.verbose);
+    log.info('git repo log formated :', options.verbose);
     items.forEach(item => {
         log(item, options.verbose);
     });
@@ -70,16 +75,13 @@ async function gitLogShort(options) {
  */
 async function gitGraphShort(options) {
     let commits = [];
-    try {
-        const { stdout } = await run("git log --date='format:%x %X' --full-history --decorate --pretty='format:%h %<|(40,trunc)%s %cd %cN' --graph ");
+    const { data } = await git.graph();
 
-        commits = stdout
-            .split('\n')
-            .filter(line => !!line.trim());
-    } catch (error) {
-    }
+    commits = data
+        .split('\n')
+        .filter(line => !!line.trim());
 
-    log('git repo graph formated :'.cyan, options.verbose);
+    log.info('git repo graph formated :', options.verbose);
     commits.forEach(item => {
         log(item, options.verbose);
     });
@@ -93,30 +95,29 @@ async function gitGraphShort(options) {
  */
 async function gitOriginAdvance(branch, options) {
     let counts = [];
-    try {
-        const { stdout } = await run(`git rev-list --count --left-right origin/${branch}...HEAD`);
+    const { data } = await git.advance(branch);
 
-        counts = stdout
-            .split('\t')
-            .map(count => parseInt(count));
-        if (counts.length !== 2)
-            throw new Error('invalid result');
-    } catch (error) {
+    counts = data
+        .split('\t')
+        .map(count => parseInt(count));
+    if (counts.length !== 2)
+        throw new Error('invalid result');
 
-    }
-
-    log('Commits behind - ahead / upstream :'.cyan, options.verbose);
+    log.info('Commits behind - ahead / upstream :', options.verbose);
     if (counts.length === 2)
         if (counts[0] === 0 && counts[1] === 0)
-            log(`    equal      ${counts[0]} - ${counts[1]}`.green, options.verbose);
+            log(chalk`{green    equal      ${counts[0]} - ${counts[1]}}`, options.verbose);
         else if (counts[0] > 0 && counts[1] > 0)
-            log(`    diverged   ${counts[0]} - ${counts[1]}`.red, options.verbose);
+            log(chalk`{red    diverged   ${counts[0]} - ${counts[1]}}`, options.verbose);
         else if (counts[0] > 0)
-            log(`    behind     ${counts[0]} - ${counts[1]}`.red, options.verbose);
+            log(chalk`{red    behind     ${counts[0]} - ${counts[1]}}`, options.verbose);
         else
-            log(`    ahead      ${counts[0]} - ${counts[1]}`.yellow, options.verbose);
+            log(chalk`{yellow    ahead      ${counts[0]} - ${counts[1]}}`, options.verbose);
     else
-        log('    no upstream'.red, options.verbose);
+        log.error('    no upstream', options.verbose);
+
+    localStatus.behind = counts[0];
+    localStatus.ahead = counts[1];
 
     return counts;
 }
@@ -126,37 +127,38 @@ async function gitOriginAdvance(branch, options) {
  * outputs full of current branch
  */
 async function gitFullStatus(options) {
-    const branch = await gitCurrentBranch(silent());
-    if (!branch) {
-        log('Current dir is not a git repo.'.red);
+    if (!localBranch)
+        await gitCurrentBranch(silent());
+    if (!localBranch) {
+        log.error('Current dir is not a git repo.');
         return '';
     }
 
     const paths = await gitStatusShort(silent());
     const commits = await gitGraphShort(silent()); // gitLogShort();
-    const advance = await gitOriginAdvance(branch, silent());
+    const advance = await gitOriginAdvance(localBranch, silent());
 
     log('--------------------------------------------------------------------');
-    log(`Current branch is ${branch.green}`.cyan.bold);
-    log('  Commits log of the branch :'.blue);
+    log.info(chalk`Current branch is {green ${localBranch}}`);
+    log(chalk.blue('  Commits log of the branch :'));
     commits.forEach(commit => log(`  ${commit}`));
-    log('  Differences between HEAD, index and working tree :'.blue);
+    log(chalk.blue('  Differences between HEAD, index and working tree :'));
     paths.forEach(path => log(`    ${path}`));
-    log('  Commits behind - ahead / upstream :'.blue);
+    log(chalk.blue('  Commits behind - ahead / upstream :'));
     if (advance.length === 2)
         if (advance[0] === 0 && advance[1] === 0)
-            log(`    equal      ${advance[0]} - ${advance[1]}`.green);
+            log(chalk`{green    equal      ${advance[0]} - ${advance[1]}}`, options.verbose);
         else if (advance[0] > 0 && advance[1] > 0)
-            log(`    diverged   ${advance[0]} - ${advance[1]}`.red);
+            log(chalk`{red    diverged   ${advance[0]} - ${advance[1]}}`, options.verbose);
         else if (advance[0] > 0)
-            log(`    behind     ${advance[0]} - ${advance[1]}`.red);
+            log(chalk`{red    behind     ${advance[0]} - ${advance[1]}}`, options.verbose);
         else
-            log(`    ahead      ${advance[0]} - ${advance[1]}`.yellow);
+            log(chalk`{yellow    ahead      ${advance[0]} - ${advance[1]}}`, options.verbose);
     else
-        log('    no upstream'.red);
+        log.error('    no upstream');
     log('--------------------------------------------------------------------');
 
-    return branch;
+    return localBranch;
 }
 
 /**
@@ -167,41 +169,39 @@ function register(program) {
     program
         .command('status')
         .alias('ss')
-        .description('status short')
-        .action(gitStatusShort);
+        .description('Short status of local branch')
+        .action(gitStatusShort)
+        .category('Status');
 
     program
         .command('log')
-        .alias('lg')
-        .description('log short')
-        .action(gitLogShort);
+        .alias('lo')
+        .description('Short log of local branch')
+        .action(gitLogShort)
+        .category('Log');
 
     program
         .command('graph')
-        .alias('gr')
-        .description('log graph short')
-        .action(gitGraphShort);
+        .alias('lg')
+        .description('Graph of the local branch')
+        .action(gitGraphShort)
+        .category('Log');
 
     program
         .command('advance <branch>')
         .alias('ad')
-        .description('status behind - ahead / upstream')
-        .action(gitOriginAdvance);
+        .description('Behind-ahead remote/<branch>')
+        .action(gitOriginAdvance)
+        .category('Status');
 
     program
         .command('status-full')
         .alias('sf')
-        .description('status full of current branch')
-        .action(gitFullStatus);
+        .description('Full status of local branch')
+        .action(gitFullStatus)
+        .category('Status');
 }
 
-export {
-    gitStatusShort,
-    gitLogShort,
-    gitGraphShort,
-    gitOriginAdvance,
-    gitFullStatus,
-    register
-};
+export { gitStatusShort, gitLogShort, gitGraphShort, gitOriginAdvance, gitFullStatus, localStatus, register };
 
 // ____end of file____
