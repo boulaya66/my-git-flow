@@ -1,8 +1,7 @@
 'use strict';
 
-import chalk from 'chalk';
 import git from './git-commands.js';
-import { log, silent } from './utils.js';
+import { log, silent, colors } from './utils.js';
 import inquirer from 'inquirer';
 import { localBranch, gitBranches } from './git-branch.js';
 import { gitStatusShort, gitFullStatus, gitOriginAdvance } from './git-status.js';
@@ -32,7 +31,7 @@ async function gitCommit(msg, options) {
         const answers = await inquirer.prompt({
             type: 'input',
             name: 'msg',
-            message: chalk.cyan.bold('What\'s the commit message')
+            message: colors.prompt('What\'s the commit message')
         });
         if (!answers.msg) {
             log.error('Abort => do not commit.');
@@ -41,7 +40,7 @@ async function gitCommit(msg, options) {
         msg = answers.msg;
     }
 
-    log.info(`Commit staged changes with msg "${chalk.green(msg)}"`, options.verbose);
+    log.info(`Commit staged changes with msg "${colors.data(msg)}"`, options.verbose);
     try {
         const data = await git.commit.unsafe(msg);
         log(data, options.verbose);
@@ -107,17 +106,17 @@ async function gitRebaseLocal(branch, options) {
         const choices = [];
         branches.forEach(item => {
             choices.push({
-                name: item.match(/^origin/) ? chalk.red(item) : chalk.white(item),
+                name: item.match(/^origin/) ? colors.error(item) : colors.info(item),
                 value: item
             });
         });
         choices.push(new inquirer.Separator());
-        choices.push({ name: chalk.yellow.bold('Abort'), short: ' ', value: '' });
+        choices.push({ name: colors.debug('Abort'), short: ' ', value: '' });
 
         const answers = await inquirer.prompt({
             type: 'list',
             name: 'branch',
-            message: chalk.cyan.bold('Select branch'),
+            message: colors.prompt('Select branch'),
             choices: choices,
             default: 'origin/master',
             pageSize: 20
@@ -154,17 +153,17 @@ async function gitRebase(branch, options) {
         const choices = [];
         branches.forEach(item => {
             choices.push({
-                name: item.match(/^origin/) ? chalk.red(item) : chalk.white(item),
+                name: item.match(/^origin/) ? colors.error(item) : colors.info(item),
                 value: item
             });
         });
         choices.push(new inquirer.Separator());
-        choices.push({ name: chalk.yellow.bold('Abort'), short: ' ', value: '' });
+        choices.push({ name: colors.debug('Abort'), short: ' ', value: '' });
 
         const answers = await inquirer.prompt({
             type: 'list',
             name: 'branch',
-            message: chalk.cyan.bold('Select branch'),
+            message: colors.prompt('Select branch'),
             choices: choices,
             default: 'origin/master',
             pageSize: 20
@@ -199,18 +198,18 @@ async function gitMerge(branch, options) {
         const choices = [];
         branches.forEach(item => {
             choices.push({
-                name: item.match(/^origin/) ? chalk.red(item) : chalk.white(item),
+                name: item.match(/^origin/) ? colors.error(item) : colors.info(item),
                 value: item
             });
         });
         choices.push(new inquirer.Separator());
-        choices.push({ name: chalk.yellow.bold('Abort'), short: ' ', value: '' });
+        choices.push({ name: colors.debug('Abort'), short: ' ', value: '' });
         */
 
         const answers = await inquirer.prompt({
             type: 'list',
             name: 'branch',
-            message: chalk.cyan.bold('Select branch'),
+            message: colors.prompt('Select branch'),
             // choices: choices,
             default: 'Abort',
             pageSize: 20

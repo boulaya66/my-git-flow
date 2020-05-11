@@ -4,26 +4,12 @@
  * import packages
  */
 import commander from 'commander';
-import chalk from 'chalk';
-import { log } from './utils.js';
+import { log, colors } from './utils.js';
 import { getCurrentVersion } from './version.js';
 import * as branches from './git-branch.js';
 import * as status from './git-status.js';
 import * as commit from './git-commit.js';
 import * as workflow from './git-workflow.js';
-
-// #region chalk
-
-/**
- * chalk custom
- * add enable and disable for easier migration from colors.js
- */
-chalk.enable = function () { chalk.level = 1 };
-chalk.disable = function () { chalk.level = 0 };
-chalk.toggle = function () { chalk.level = chalk.level > 0 ? 0 : 1 };
-chalk.enabled = () => chalk.level > 0;
-
-// #endregion
 
 // #region extends commander.Command
 
@@ -50,7 +36,7 @@ class GitjsCommand extends commander.Command {
             .option('--silent, --no-verbose', 'disable output')
             .option('-cl, --clear', 'clear console before command output')
             .on('option:no-color', () => {
-                chalk.disable();
+                colors.disable();
             })
             .on('option:no-verbose', () => {
                 log.disable();
@@ -111,12 +97,12 @@ async function gitjsList(options) {
 
 /**
  * togglecolor
- * toggle chalk.enabled and emit event
+ * toggle colors.enabled and emit event
  */
 async function togglecolor() {
-    chalk.toggle();
+    colors.toggle();
     program.emit('color');
-    log(chalk`{yellow.bgBlue Colors ${chalk.enabled() ? 'enabled' : 'disabled'}}`);
+    log(colors.custom(`${colors.enabled() ? 'enabled' : 'disabled'}`));
 }
 
 /**
@@ -130,7 +116,7 @@ function init() {
         .option('--silent, --no-verbose', 'disable output')
         .option('-cl, --clear', 'clear console before command output')
         .on('option:no-color', () => {
-            chalk.disable();
+            colors.disable();
         })
         .on('option:no-verbose', () => {
             log.disable();

@@ -5,37 +5,33 @@ import { exec } from 'child_process';
 import chalk from 'chalk';
 
 const debug = false;
-function rlog(msg) {
-    if (debug)
-        console.log(msg);
-}
 
 // #region async running tasks
 
 const run = util.promisify(exec);
 
 const runSafe = async (cmd) => {
-    rlog(cmd);
+    log.debug(cmd);
     const res = { cmd: cmd, data: null, err: null };
     try {
         const { stdout } = await run(cmd);
-        rlog(stdout);
+        log.debug(stdout);
         res.data = stdout;
     } catch (error) {
-        rlog(error.stderr || error.message);
+        log.debug(error.stderr || error.message);
         res.err = error.stderr || error.message;
     }
     return res;
 };
 
 const runUnsafe = async (cmd) => {
-    rlog(cmd);
+    log.debug(cmd);
     try {
         const { stdout } = await run(cmd, { shell: true });
-        rlog(stdout);
+        log.debug(stdout);
         return stdout;
     } catch (error) {
-        rlog(error.stderr || error.message);
+        log.debug(error.stderr || error.message);
         throw new Error(error.stderr || error.message);
     }
 };
@@ -43,14 +39,14 @@ const runUnsafe = async (cmd) => {
 function runFactory(cmd) {
     const runTask = async (...args) => {
         const task = util.format(cmd, ...args);
-        rlog(task);
+        log.debug(task);
         const res = { cmd: task, data: null, err: null };
         try {
             const { stdout } = await run(task);
-            rlog(stdout);
+            log.debug(stdout);
             res.data = stdout;
         } catch (error) {
-            rlog(error.stderr || error.message);
+            log.debug(error.stderr || error.message);
             res.err = error.stderr || error.message;
         }
         return res;
@@ -58,13 +54,13 @@ function runFactory(cmd) {
 
     runTask.unsafe = async (...args) => {
         const task = util.format(cmd, ...args);
-        rlog(task);
+        log.debug(task);
         try {
             const { stdout } = await run(task);
-            rlog(stdout);
+            log.debug(stdout);
             return stdout;
         } catch (error) {
-            rlog(error.stderr || error.message);
+            log.debug(error.stderr || error.message);
             throw new Error(error.stderr || error.message);
         }
     };
@@ -79,6 +75,36 @@ function runFactory(cmd) {
 const insert = (str, index, value) => str.substr(0, index) + value + str.substr(index);
 
 const inject = (str, obj) => str.replace(/\${(.*?)}/g, (x, g) => obj[g]);
+
+// #endregion
+
+// #region  colors (usefull to migrate from colors.js to/from chalk)
+
+const colors = chalk;
+
+/**
+ * colors custom
+ * add enable and disable for easier migration from colors.js
+ */
+colors.enable = function () { chalk.level = 1 };
+colors.disable = function () { chalk.level = 0 };
+colors.toggle = function () { chalk.level = chalk.level > 0 ? 0 : 1 };
+colors.enabled = () => chalk.level > 0;
+
+colors.silly = chalk.grey;
+colors.input = chalk.blue.bold;
+colors.verbose = chalk.white.bold;
+colors.prompt = chalk.cyan.bold;
+colors.info = chalk.white;
+colors.data = chalk.green;
+colors.help = chalk.yellow.bold;
+colors.warn = chalk.yellow;
+colors.debug = chalk.red.bold;
+colors.error = chalk.red;
+colors.custom = chalk.whiteBright.bgBlueBright.bold;
+
+const olderror = console.error;
+console.error = (message) => olderror(colors.error(message));
 
 // #endregion
 
@@ -97,28 +123,22 @@ log.enable = function () { log.enabled = true };
 log.disable = function () { log.enabled = false };
 
 log.info = (message, verbose = true) => { log(chalk.cyan(message), verbose) };
-log.warn = (message, verbose = true) => { log(chalk.yellow(message), verbose) };
-log.error = (message, verbose = true) => { log(chalk.red(message), verbose) };
-log.debug = (message) => { if (debug) console.log(chalk`{red.bold DEBUG: }{yellow ${message}}`); };
-
-// #endregion
-
-// #region  colorized console.error
-
-const olderror = console.error;
-console.error = (message) => olderror(chalk.red(message));
+log.warn = (message, verbose = true) => { log(colors.warn(message), verbose) };
+log.error = (message, verbose = true) => { log(colors.error(message), verbose) };
+log.debug = (message) => { if (debug) console.log(colors.debug(`DEBUG: ${colors.warn(message)}`)); };
 
 // #endregion
 
 export {
-    run,
+    // run,
     runFactory,
     runSafe,
     runUnsafe,
     insert,
     inject,
     silent,
-    log
+    log,
+    colors
 };
 
 // ____end of file____

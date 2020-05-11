@@ -1,9 +1,8 @@
 'use strict';
 
-import chalk from 'chalk';
 import { gitCurrentBranch, localBranch } from './git-branch.js';
 import git from './git-commands.js';
-import { insert, log, silent } from './utils.js';
+import { insert, log, silent, colors } from './utils.js';
 
 var localStatus = {};
 
@@ -28,18 +27,18 @@ async function gitStatusShort(options) {
             const wd = line.charAt(2);
             if (wd === ' ') {
                 localStatus.staged++;
-                return chalk.green(line);
+                return colors.data(line);
             } else if (wd === '?') {
                 localStatus.untracked++;
-                return chalk.yellow(line);
+                return colors.warn(line);
             } else {
                 localStatus.modified++;
-                return chalk.red(line);
+                return colors.error(line);
             }
         });
 
     if (items.length === 0)
-        items = [chalk.green('nothing to commit')];
+        items = [colors.data('nothing to commit')];
 
     log.info('git repo status :', options.verbose);
     items.forEach(item => {
@@ -106,13 +105,13 @@ async function gitOriginAdvance(branch, options) {
     log.info('Commits behind - ahead / upstream :', options.verbose);
     if (counts.length === 2)
         if (counts[0] === 0 && counts[1] === 0)
-            log(chalk`{green    equal      ${counts[0]} - ${counts[1]}}`, options.verbose);
+            log(colors.data(`   equal      ${counts[0]} - ${counts[1]}`), options.verbose);
         else if (counts[0] > 0 && counts[1] > 0)
-            log(chalk`{red    diverged   ${counts[0]} - ${counts[1]}}`, options.verbose);
+            log(colors.error(`   diverged   ${counts[0]} - ${counts[1]}`), options.verbose);
         else if (counts[0] > 0)
-            log(chalk`{red    behind     ${counts[0]} - ${counts[1]}}`, options.verbose);
+            log(colors.error(`   behind     ${counts[0]} - ${counts[1]}`), options.verbose);
         else
-            log(chalk`{yellow    ahead      ${counts[0]} - ${counts[1]}}`, options.verbose);
+            log(colors.warn(`   ahead      ${counts[0]} - ${counts[1]}`), options.verbose);
     else
         log.error('    no upstream', options.verbose);
 
@@ -139,21 +138,21 @@ async function gitFullStatus(options) {
     const advance = await gitOriginAdvance(localBranch, silent());
 
     log('--------------------------------------------------------------------');
-    log.info(chalk`Current branch is {green ${localBranch}}`);
-    log(chalk.blue('  Commits log of the branch :'));
+    log.info(`Current branch is ${colors.data(localBranch)}`);
+    log(colors.input('  Commits log of the branch :'));
     commits.forEach(commit => log(`  ${commit}`));
-    log(chalk.blue('  Differences between HEAD, index and working tree :'));
+    log(colors.input('  Differences between HEAD, index and working tree :'));
     paths.forEach(path => log(`    ${path}`));
-    log(chalk.blue('  Commits behind - ahead / upstream :'));
+    log(colors.input('  Commits behind - ahead / upstream :'));
     if (advance.length === 2)
         if (advance[0] === 0 && advance[1] === 0)
-            log(chalk`{green    equal      ${advance[0]} - ${advance[1]}}`, options.verbose);
+            log(colors.data(`   equal      ${advance[0]} - ${advance[1]}`), options.verbose);
         else if (advance[0] > 0 && advance[1] > 0)
-            log(chalk`{red    diverged   ${advance[0]} - ${advance[1]}}`, options.verbose);
+            log(colors.error(`   diverged   ${advance[0]} - ${advance[1]}`), options.verbose);
         else if (advance[0] > 0)
-            log(chalk`{red    behind     ${advance[0]} - ${advance[1]}}`, options.verbose);
+            log(colors.error(`   behind     ${advance[0]} - ${advance[1]}`), options.verbose);
         else
-            log(chalk`{yellow    ahead      ${advance[0]} - ${advance[1]}}`, options.verbose);
+            log(colors.warn(`   ahead      ${advance[0]} - ${advance[1]}`), options.verbose);
     else
         log.error('    no upstream');
     log('--------------------------------------------------------------------');

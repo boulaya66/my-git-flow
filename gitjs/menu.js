@@ -5,9 +5,8 @@
  */
 import inquirer from 'inquirer';
 import CommandPrompt from 'inquirer-command-prompt';
-import chalk from 'chalk';
 
-import { runUnsafe, log, silent } from './utils.js';
+import { runUnsafe, log, silent, colors } from './utils.js';
 import program from './init.js';
 import * as branches from './git-branch.js';
 import * as status from './git-status.js';
@@ -17,7 +16,7 @@ import * as status from './git-status.js';
 const formatNumber = x => isNaN(x) ? '??' : x;
 
 async function keypress() {
-    log(chalk`{white.bold Press any key to continue}`);
+    log(colors.verbose('white.bold Press any key to continue'));
     process.stdin.resume();
     process.stdin.setRawMode(true);
     return new Promise(resolve => process.stdin.once('data', () => {
@@ -63,7 +62,8 @@ const gitjsCommands = [];
 
 const menuChoices = [];
 
-// TODO: check autocompletion for second parameter
+const gitCommands = ['branch', 'commit', 'pull', 'push', 'add', 'status', 'diff', 'reset', 'checkout', 'merge', 'log', 'tag', 'fetch', 'remote', 'log', 'rebase'];
+
 var autoCompletion = [];
 
 async function initMenu() {
@@ -80,13 +80,14 @@ async function initMenu() {
         gitjsCommands.push(cmd._aliases[0]);
     });
     autoCompletion = promptCommands.concat(gitjsCommands);
+    gitCommands.forEach(word => autoCompletion.push('git ' + word));
 
     // add categories to choices
     program.categories().forEach(category => {
         if (category)
             menuChoices.push({
                 value: 'Menu',
-                name: chalk`{blue.bold ${category}}`, // category.blue.bold,
+                name: colors.input(category), // category.blue.bold,
                 sort: category
             });
     });
@@ -96,31 +97,29 @@ async function initMenu() {
         if (cmd.name() !== '!list') { // exclude or not list command
             // usage
             let usage = '[';
-            cmd.options.forEach(opt => { usage += chalk`{green ${opt.short} }` });
+            cmd.options.forEach(opt => { usage += colors.data(`${opt.short} `) });
             usage += ']';
-            cmd._args.forEach(arg => { usage += arg.required ? chalk`{magenta <${arg.name}> }` : chalk`{green [${arg.name}] }` });
+            cmd._args.forEach(arg => {
+                usage += arg.required ? colors.debug(`<${arg.name}> `) : colors.data(`[${arg.name}] `);
+            });
 
             // description
-            let desc = cmd.description().split(':');
-            if (desc.length > 1)
-                desc = '' + chalk.white.bold(desc[0].padEnd(8)) + ':' + chalk.white(desc[1].padEnd(31));
-            else
-                desc = '' + cmd.description().padEnd(40);
+            const desc = '' + colors.info(cmd.description().padEnd(40));
 
             // add to choices
             menuChoices.push({
                 value: cmd.name(),
-                name: `${desc.padEnd(40)} ${cmd._aliases.length > 0 ? chalk.white.bold(cmd._aliases[0].padEnd(2)) : '  '} ${usage.padEnd(20)}`,
+                name: `${desc.padEnd(40)} ${cmd._aliases.length > 0 ? colors.verbose(cmd._aliases[0].padEnd(2)) : '  '} ${usage.padEnd(20)}`,
                 sort: `${cmd.category()}${cmd.name()}`
             });
         }
     });
     menuChoices.sort((a, b) => a.sort.localeCompare(b.sort));
     menuChoices.push(new inquirer.Separator());
-    menuChoices.push({ name: chalk.blue.bold('Prompt'), value: 'Prompt' });
-    menuChoices.push({ name: chalk.yellow.bold('Help'), value: 'Help' });
+    menuChoices.push({ name: colors.input('Prompt'), value: 'Prompt' });
+    menuChoices.push({ name: colors.help('Help'), value: 'Help' });
     // items.push(new inquirer.Separator());
-    menuChoices.push({ name: chalk.red.bold('Quit gitjs'), short: ' ', value: '' });
+    menuChoices.push({ name: colors.debug('Quit gitjs'), short: ' ', value: '' });
 
     // init prompt
     log.enable();
@@ -145,7 +144,7 @@ async function sessionPrompt() {
     const answers = await inquirer.prompt({
         type: 'command',
         name: 'command',
-        message: chalk`{blue.bold [${pwd}] >}`, // '[gitjs] >'.blue.bold,
+        message: colors.input(`[${pwd}] >`),
         prefix: '',
         autoCompletion: autoCompletion,
         context: 0
@@ -185,18 +184,18 @@ async function menuPrompt() {
     let cmd, argv;
 
     console.clear();
-    log(chalk.whiteBright.bgBlueBright.bold(`Gitjs on local branch ${branches.localBranch}`.padEnd(55) +
-        chalk.green(`${formatNumber(status.localStatus.untracked)}U `.padEnd(4)) +
-        chalk.red(`${formatNumber(status.localStatus.modified)}M `.padEnd(4)) +
-        chalk.yellow(`${formatNumber(status.localStatus.staged)}S `.padEnd(4)) +
-        chalk.red(`${formatNumber(status.localStatus.behind)}↓ `.padEnd(4)) +
-        chalk.yellow(`${formatNumber(status.localStatus.ahead)}↑ `.padEnd(4))
+    log(colors.custom(`Gitjs on local branch ${branches.localBranch}`.padEnd(55) +
+        colors.data(`${formatNumber(status.localStatus.untracked)}U `.padEnd(4)) +
+        colors.error(`${formatNumber(status.localStatus.modified)}M `.padEnd(4)) +
+        colors.warn(`${formatNumber(status.localStatus.staged)}S `.padEnd(4)) +
+        colors.error(`${formatNumber(status.localStatus.behind)}↓ `.padEnd(4)) +
+        colors.warn(`${formatNumber(status.localStatus.ahead)}↑ `.padEnd(4))
     ));
 
     const answers = await inquirer.prompt({
         type: 'list',
         name: 'command',
-        message: chalk`{cyan.bold Select git-js command}`,
+        message: colors.prompt('Select git-js command'),
         choices: menuChoices,
         default: 'Prompt',
         pageSize: menuChoices.length + 6,
@@ -204,7 +203,7 @@ async function menuPrompt() {
     });
 
     if (!answers.command) {
-        log(chalk.red.bold('Quit gitjs'));
+        log(colors.debug('Quit gitjs'));
         return 0;
     }
     switch (answers.command) {
@@ -218,7 +217,7 @@ async function menuPrompt() {
             if (await session() > 0) {
                 return 1;
             } else {
-                log(chalk.red.bold('Quit gitjs'));
+                log(colors.debug('Quit gitjs'));
                 return 0;
             }
         default:

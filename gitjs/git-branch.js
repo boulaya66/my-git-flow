@@ -1,9 +1,8 @@
 'use strict';
 
-import chalk from 'chalk';
 import inquirer from 'inquirer';
 import git from './git-commands.js';
-import { silent, log } from './utils.js';
+import { silent, log, colors } from './utils.js';
 import { gitFullStatus } from './git-status.js';
 
 var localBranch = '';
@@ -15,13 +14,13 @@ async function gitCreateBranch(branch, options) {
     log.enable();
     if (!localBranch)
         await gitCurrentBranch(silent());
-    log.info(chalk`Current branch is {green ${localBranch}}`);
+    log.info(`Current branch is {green ${localBranch}}`);
 
     if (!branch) {
         const questions = {
             type: 'input',
             name: 'branch',
-            message: chalk.cyan.bold('What\'s the name of the branch to create')
+            message: colors.prompt('What\'s the name of the branch to create')
         };
         const answers = await inquirer.prompt(questions);
         if (!answers.branch) {
@@ -31,7 +30,7 @@ async function gitCreateBranch(branch, options) {
         branch = answers.branch;
     }
 
-    log.info(chalk`Switch to branch {green ${branch}}`);
+    log.info(`Switch to branch ${colors.data(branch)}`);
     try {
         const data1 = await git.createBranch.unsafe(branch);
         log(data1);
@@ -53,7 +52,7 @@ async function gitDeleteBranch(branch, options) {
     log.enable();
     if (!localBranch)
         await gitCurrentBranch(silent());
-    log.info(chalk`Current branch is {green ${localBranch}}`);
+    log.info(`Current branch is ${colors.data(localBranch)}`);
 
     if (!branch) {
         const answers = await selectBranch(false, false);
@@ -65,7 +64,7 @@ async function gitDeleteBranch(branch, options) {
         return;
     }
 
-    log.info(chalk`Delete branch {green ${branch}}`);
+    log.info(`Delete branch ${colors.data(branch)}`);
     try {
         const stdout1 = await git.deleteLocalBranch.unsafe(branch);
         log(stdout1);
@@ -92,9 +91,9 @@ async function gitBranches(options) {
             formated = `${(item === branch) ? '*' : ' '}${item.padEnd(40)}  ${match || '--- | --- | ---'}`;
         }
         if (item === branch)
-            formated = chalk.green(formated);
+            formated = colors.data(formated);
         else if (item.match(/^origin/))
-            formated = chalk.red(formated);
+            formated = colors.error(formated);
         return formated;
     }
 
@@ -122,8 +121,10 @@ async function gitCurrentBranch(options) {
     let branch = '';
     const { data } = await git.getBranch();
     branch = data.split('\n')[0];
-    const msg = branch ? chalk.cyan('Current branch is ') : chalk.red('Current dir is not a git repo.');
-    log(chalk`${msg} {green ${branch}}`, options.verbose);
+    if (branch)
+        log.info(`Current branch is ${colors.data(branch)}`, options.verbose);
+    else
+        log.error('Current dir is not a git repo.', options.verbose);
 
     localBranch = branch;
 
@@ -138,7 +139,7 @@ async function gitCheckout(branch, options) {
     log.enable();
     if (!localBranch)
         await gitCurrentBranch(silent());
-    log.info(chalk`Current branch is {green ${localBranch}}`);
+    log.info(`Current branch is ${colors.data(localBranch)}`);
 
     if (!branch) {
         log('git fetch --all ........');
@@ -155,36 +156,36 @@ async function gitCheckout(branch, options) {
         });
         choices.forEach(choice => {
             if (choice.name === localBranch) {
-                choice.disabled = chalk.grey('This is the current branch.');
+                choice.disabled = colors.silly('This is the current branch.');
                 choice.value = choice.name;
-                choice.name = chalk.grey(choice.name);
+                choice.name = colors.silly(choice.name);
             } else if (choice.pattern[1]) {
                 if (choice.name === 'origin/HEAD') {
-                    choice.disabled = chalk.grey('Not allowed for integrity reason.');
+                    choice.disabled = colors.silly('Not allowed for integrity reason.');
                     choice.value = choice.name;
-                    choice.name = chalk.grey(choice.name);
+                    choice.name = colors.silly(choice.name);
                 } else if (choices.find(item => {
                     return (!item.pattern[1] && item.pattern[0] === (choice.pattern[3] || '') + choice.pattern[6]);
                 })) {
-                    choice.disabled = chalk.grey('Already in local repo.');
+                    choice.disabled = colors.silly('Already in local repo.');
                     choice.value = choice.name;
-                    choice.name = chalk.grey(choice.name);
+                    choice.name = colors.silly(choice.name);
                 } else {
                     choice.value = (choice.pattern[3] || '') + choice.pattern[6];
-                    choice.name = chalk.red(choice.value);
+                    choice.name = colors.error(choice.value);
                 }
             } else {
                 choice.value = choice.name;
-                choice.name = chalk.green(choice.name);
+                choice.name = colors.data(choice.name);
             }
         });
         choices.push(new inquirer.Separator());
-        choices.push({ name: chalk.yellow.bold('Abort'), short: ' ', value: '' });
+        choices.push({ name: colors.debug('Abort'), short: ' ', value: '' });
 
         const answers = await inquirer.prompt({
             type: 'list',
             name: 'branch',
-            message: chalk.cyan.bold('Switch to branch'),
+            message: colors.prompt('Switch to branch'),
             choices: choices,
             default: 'master',
             pageSize: 20
@@ -196,7 +197,7 @@ async function gitCheckout(branch, options) {
         branch = answers.branch;
     }
 
-    log.info(chalk`Switch to branch {green ${branch}}`);
+    log.info(`Switch to branch ${colors.data(branch)}`);
     try {
         const data = await git.checkout.unsafe(branch);
         log(data);
@@ -217,7 +218,7 @@ async function selectBranch(allowMaster = true, allowLocal = true, allowAbort = 
     branches.forEach(item => {
         if (!item.match(/^origin/))
             choices.push({
-                name: chalk.white(item),
+                name: colors.info(item),
                 value: item
             });
     });
@@ -225,13 +226,13 @@ async function selectBranch(allowMaster = true, allowLocal = true, allowAbort = 
     choices = choices.filter(choice => (choice.value !== 'master' || allowMaster) && (choice.value !== localBranch || allowLocal));
     if (allowAbort) {
         choices.push(new inquirer.Separator());
-        choices.push({ name: chalk.yellow.bold('Abort'), short: ' ', value: '' });
+        choices.push({ name: colors.debug('Abort'), short: ' ', value: '' });
     }
 
     const answers = await inquirer.prompt({
         type: 'list',
         name: 'branch',
-        message: chalk.cyan.bold('Select branch'),
+        message: colors.prompt('Select branch'),
         choices: choices,
         default: allowMaster ? 'master' : '',
         pageSize: 20
