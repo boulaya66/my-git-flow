@@ -12,6 +12,7 @@ This workflow is intended to manage unfinished work AND often changes of workpla
   - [Step 2: on computer 2](#step-2-on-computer-2)
   - [Step n: on computer 1](#step-n-on-computer-1)
   - [Step n+1: on computer 2](#step-n-1)
+- [Alternative with backup](#alternative)
 
 ## Introduction
 
@@ -70,7 +71,35 @@ git add .
 git commit -m "TMP-save-1"
 git push
 ```
-Go to step 1
+<a name="alternative"></a>
+## Alternative with backup
+We can also a USB key as backup and push unfinished work on that key instead of central repo.
+Backup process is described in [Git backup on USB key](GIT-BACKUP.md).
+**Step 1**
+```shell
+git pull
+# working .... time to leave !
+git add .
+git commit -m "TMP-save"
+git push backup
+```
+**step 2**
+```shell
+git pull backup
+# working .... time to leave !
+git add .
+git commit --amend --no-edit
+git push backup
+```
+**step n**
+```shell
+git pull backup
+# working .... ready to commit !
+git add .
+git commit --amend -m "Work finished"
+git push origin 
+```
+
 <div align="right">
     <b><a href="#my-stashing-workflow">↥ back to top</a></b>
 </div>

@@ -1,10 +1,12 @@
 <a name="top"></a>
 # Testing my git flow...
+This documentation covers my git flow, used tools and collects any usefull thing.
 
-## Documentation:
+## Table of contents:
 - [My git flow](./docs/MY-GITFLOW.md)
 - [My stashing workflow](./docs/MY-STASH.md)
 - [Feature set] ***TODO***
+- [Git-js](./docs/GIT-JS.md)
 - Usefull commands (see below)
 
 
