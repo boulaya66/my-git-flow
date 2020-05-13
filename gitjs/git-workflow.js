@@ -1,12 +1,40 @@
 'use strict';
 
 // import 'colors';
-// import { run, silent, log } from './utils.js';
+import { runUnsafe } from './utils.js';
 // import { gitCurrentBranch } from './git-branch.js';
 
 // TODO: check message pattern
 
 // TODO: check branch name pattern
+async function lastBranchNumber() {
+    let max = 0;
+
+    const branches = await runUnsafe("git branch -a --format='%(refname:short)'");
+    branches.split('\n').forEach(item => {
+        if (!item)
+            return;
+        const match = item.match(/^((origin)\/)?((.{3})#(\d{3})-)?(.+)/);
+        const idx = parseInt(match[5], 10);
+        if (idx > max)
+            max = idx;
+    });
+
+    const commits = await runUnsafe("git log master --pretty='format:%s'");
+    commits.split('\n').forEach(item => {
+        if (!item)
+            return;
+        const match = item.match(/.{3}#\d{3}/g);
+        if (match && match.length > 0)
+            match.forEach(found => {
+                const idx = parseInt(found.substr(4, 3));
+                if (idx > max)
+                    max = idx;
+            });
+    });
+
+    return max;
+}
 
 // TODO: start session
 
@@ -38,7 +66,8 @@ function register(program) {
 }
 
 export {
-    register
+    register,
+    lastBranchNumber
 };
 
 // ____end of file____
