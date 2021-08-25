@@ -1,28 +1,34 @@
-<a name="top"></a>
-# Testing my git flow...
+# Testing my git flow
 
-## Documentation:
+<a name="top"></a>
+
+## Documentation
+
 - [My git flow](./docs/MY-GITFLOW.md)
 - [My stashing workflow](./docs/MY-STASH.md)
 - [Feature set] ***TODO***
 - Usefull commands (see below)
 
-
-## Usefull commands
+## Useful commands
 
 ### Show branches
+
 | Command | Description |
 | --- | --- |
 |`git fetch --all`|Fetch all remotes|
 |`git branch -a`|List both remote-tracking branches and local branches. |
 |`git branch -r`|List the remote-tracking branches.|
+
 ### Rename branches
+
 | Command | Description |
 | --- | --- |
 |`git $branch -m new-name`|Rename local branch, assuming we're in.|
 |`git push origin :$branch new-name`|Delete the old-name remote branch and push the new-name local branch.|
 |`git push origin -u new-name`|Reset the upstream branch for the new-name local branch,assuming we switched to it.|
+
 ### Show status
+
 | Command | Description |
 | --- | --- |
 |`git rev-parse --abbrev-ref HEAD`|Retreives current branch name|
@@ -32,7 +38,9 @@
 |`git log --graph --pretty='format:%H %s'`|Same with graph otpion|
 |`git status -s`|Give the output in the short-format.|
 |``||
-### Undoos
+
+### Undo
+
 | Command | Description |
 | --- | --- |
 |`git checkout HEAD file`||
