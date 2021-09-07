@@ -31,12 +31,14 @@
 
 | Command | Description |
 | --- | --- |
-|`git rev-parse --abbrev-ref HEAD`|Retreives current branch name|
-|`git symbolic-ref --short HEAD`|Retreives current branch name|
+|`git rev-parse --abbrev-ref HEAD`|Retrieves current branch name|
+|`git branch --show-current`|Retrieves current branch name|
+|`git symbolic-ref --short HEAD`|Retrieves current branch name|
 |`git rev-list --count --left-right origin/$branch...HEAD`|print the counts for left and right commits, separated by a tab|
 |`git log --pretty='format:%H %s'`|Customized logging: full commit tag and name|
-|`git log --graph --pretty='format:%H %s'`|Same with graph otpion|
+|`git log --graph --pretty='format:%H %s'`|Same with graph option|
 |`git status -s`|Give the output in the short-format.|
+|`git rev-parse --show-superproject-working-tree`|Retrieve super project from within submodule.|
 |``||
 
 ### Undo
